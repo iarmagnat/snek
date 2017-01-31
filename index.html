@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Snek</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+    <h1>Snek</h1>
+
+    <div id="stage"></div>
+
+    <p>Score: <span id="score"></span></p>
+    
+    <button id="start">Start</button>
+
+    <br>
+
+    <p>High Score: <span id="highScore"></span></p>
+
+    <button id="reset">Reset High Score</button>
+
+    <script>
+        // You can also require other files to run in this process
+        require('./renderer.js')
+    </script>
+</body>
+</html>
