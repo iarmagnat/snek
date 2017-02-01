@@ -10,6 +10,9 @@ var prevDirection = [0, 1]
 var direction = [0, 1]
 var pos = [0, 2]
 var highScore
+var apple
+var Player1
+var deleted = []
 
 var $ = require('jquery');
 
@@ -48,6 +51,11 @@ function Players (startPos, body, keys) {
         this.xBody.unshift(this.xpos)
         this.yBody.unshift(this.ypos)
 
+        deleted.push([ 
+            this.xBody[this.length - 1],  
+            this.yBody[this.length - 1] 
+        ]);
+
         this.xBody.splice(this.length - 1, 10)
         this.yBody.splice(this.length - 1, 10)
 
@@ -57,7 +65,15 @@ function Players (startPos, body, keys) {
         this.prevxDir = this.xDir;
         this.prevyDir = this.yDir;
 
-        if (nextX in this.xBody && nextY in this.yBody){
+        var connect = false;
+
+        for (var i = 0; i < this.xBody.length; i++) {
+            if (this.xBody[i] == nextX && this.yBody[i] == nextY){
+                connect = true
+            }
+        }
+
+        if (connect) {
             this.alive = false
             return false
         }
@@ -66,7 +82,7 @@ function Players (startPos, body, keys) {
     }
 
     this.eat = function(){
-        this.length ++
+        this.length += 2
     }
 
     this.updateDirection = function(key){
@@ -90,16 +106,12 @@ function Players (startPos, body, keys) {
             if (this.prevxDir != 0 || this.prevyDir != -1){
                 this.xDir = 0
                 this.yDir = 1
-                console.log('pwet')
             }
         }
     }
 
 
 };
-
-
-var Player1 = new Players([0, 2], [ [0, 1], [0, 0] ], [38, 40, 37, 39])
 
 
 function newStage(){
@@ -112,99 +124,71 @@ function newStage(){
     }
 }
 
-function newMap(){
-    var map = new Array(size)
-    for (var i = 0; i < map.length; i++) {
-        map[i] = new Array(size)
+function updateScreen(){
+
+    
+
+    if (Player1.prevxDir == 1 && Player1.prevyDir == 0){
+
+        //if right
+        $('#' + 'x' + Player1.xpos + 'y' + Player1.ypos).removeClass().addClass('head').html('<i class="fa fa-arrow-right"></i>');
+    }else if (Player1.prevxDir == -1 && Player1.prevyDir == 0){
+
+        //if left
+        $('#' + 'x' + Player1.xpos + 'y' + Player1.ypos).removeClass().addClass('head').html('<i class="fa fa-arrow-left"></i>');
+    }else if (Player1.prevxDir == 0 && Player1.prevyDir == 1){
+
+        //if up
+        $('#' + 'x' + Player1.xpos + 'y' + Player1.ypos).removeClass().addClass('head').html('<i class="fa fa-arrow-up"></i>');
+    }else if (Player1.prevxDir == 0 && Player1.prevyDir == -1){
+
+        //if down
+        $('#' + 'x' + Player1.xpos + 'y' + Player1.ypos).removeClass().addClass('head').html('<i class="fa fa-arrow-down"></i>');
     }
 
-    for (var y = size - 1; y > -1; y = y - 1){
-            for (var x = 0; x < size; x++){
-                map[x][y] = 0
-            }
-    }
-    return map
+    $('#' + 'x' + Player1.xBody[0] + 'y' + Player1.yBody[0]).removeClass('head').addClass('snek');
+
+    deleted.forEach(function(tile) {
+        $('#' + 'x' + tile[0] + 'y' + tile[1]).removeClass().text('')
+    });
+
+    deleted = [];
+
+
+    $('#score').text( (Player1.length-3)/2 )
 }
 
-function updateScreen(map){
+function spawnApple(){
 
-    arrow = $('#' + 'x' + x + 'y' + y)
-
-    for (var y = size - 1; y > -1; y = y - 1){
-        for (var x = 0; x < size; x++){
-
-            var tile = map[x][y]
-
-            if (tile == -1){
-                
-                $('#' + 'x' + x + 'y' + y).addClass('apple');
-            } else if (tile == 0) {
-                $('#' + 'x' + x + 'y' + y).removeClass().empty();
-            } else if (tile == 1) {
-                if (direction[0] == 1 && direction[1] == 0){
-                    //if right
-                    $('#' + 'x' + x + 'y' + y).removeClass().addClass('head').html('<i class="fa fa-arrow-right"></i>');
-                }else if (direction[0] == -1 && direction[1] == 0){
-                    //if left
-                    $('#' + 'x' + x + 'y' + y).removeClass().addClass('head').html('<i class="fa fa-arrow-left"></i>');
-                }else if (direction[0] == 0 && direction[1] == 1){
-                    //if up
-                    $('#' + 'x' + x + 'y' + y).removeClass().addClass('head').html('<i class="fa fa-arrow-up"></i>');
-                }else if (direction[0] == 0 && direction[1] == -1){
-                    //if down
-                    $('#' + 'x' + x + 'y' + y).removeClass().addClass('head').html('<i class="fa fa-arrow-down"></i>');
-                }
-
-            } else {
-                $('#' + 'x' + x + 'y' + y).removeClass('head').addClass('snek');
-            }
-
-        }
-    }
-    $('#score').text( (length-3)/2 )
-}
-
-function spawnApple(map){
     missed = true
-    if (length == (size*size)){
-        return 0
-    }
+
     while (missed){
         appleX = Math.floor(Math.random() * (size - 0) + 0);
         appleY = Math.floor(Math.random() * (size - 0) + 0);
 
-        if (map[appleX][appleY] === 0){
-            map[appleX][appleY] = -1
+        if ( !(appleX in Player1.xBody && appleY in Player1.yBody) || !(appleX == Player1.xpos && appleY == Player1.ypos) ){
+            apple = [appleX, appleY]
             missed = false
         }
     }
+
+    $('#' + 'x' + apple[0] + 'y' + apple[1]).addClass('apple');
 }
 
-function play(map){
+function play(){
 
     
     
     var turn = setInterval(function(){
 
-        for (var y = size - 1; y > -1; y = y - 1){
-            for (var x = 0; x < size; x++){
-                if (map[x][y] > 0 && map[x][y] != length){
-                    map[x][y] += 1
-                } else if (map[x][y] == length){
-                    map[x][y] = 0
-                }
-            }
-        }
 
-        pos[0] = (direction[0] + pos[0] + size)%size
-        pos[1] = (direction[1] + pos[1] + size)%size
+        Player1.move()
 
-        prevDirection = direction
 
-        if (map[ pos[0] ][ pos[1] ] > 0){
+        if ( !(Player1.alive) ){
             clearInterval(turn);
 
-            score = (length-3)/2 ;
+            score = (Player1.length-3)/2 ;
             highScore =  parseInt(localStorage.getItem('highScore'));
             if (score > highScore){
                 localStorage.setItem('highScore', score);
@@ -212,28 +196,28 @@ function play(map){
             $("#highScore").text( localStorage.getItem('highScore') );
 
             $('#start').removeClass('hidden')
-        } else if ( map[ pos[0] ][ pos[1] ] == -1 ){
-            length += 2
-            spawnApple(map)
+        } else if ( Player1.xpos == apple[0] && Player1.ypos == apple[1] ){
+            Player1.eat()
+            spawnApple()
         }
 
 
-        map[ pos[0] ][ pos[1] ] = 1
+        
 
 
-        updateScreen(map)
+        updateScreen()
     }, delay);
 
 }
 
 
 /*
-document.addEventListener('keydown', function updateUp1( event ) {
-    Player1.up = event.keyCode
-    console.log(Player1.up)
-} , true);
+    document.addEventListener('keydown', function updateUp1( event ) {
+        Player1.up = event.keyCode
+        console.log(Player1.up)
+    } , true);
 
-document.removeEventListener('keydown', updateUp1(event) , true )
+    document.removeEventListener('keydown', updateUp1(event) , true )
 */
 
 // event listner: keydown -> P1 direction  udate
@@ -243,21 +227,18 @@ document.addEventListener('keydown', function(event) {
 
 $('#start').on('click', function(event){
 
+    Player1 = 0
+    Player1 = new Players([0, 2], [ [0, 1], [0, 0] ], [38, 40, 37, 39])
+
     $('#start').text('restart').addClass('hidden');
 
     newStage()
-
-    var map = newMap();
-
-    map[0][0] = 3;
-    map[0][1] = 2;
-    map[0][2] = 1;
 
     $("#x0y2").html('<i class="fa fa-arrow-up"></i>')
     $("#x0y1").html('<i class="fa fa-arrow-up"></i>')
     $("#x0y0").html('<i class="fa fa-arrow-up"></i>')
 
-    spawnApple(map);
+    spawnApple();
 
     pos = [0, 2];
     length = 3;
@@ -269,7 +250,7 @@ $('#start').on('click', function(event){
     rounds = 0;
 
 
-    play(map);
+    play();
 });
 
 $('#reset').on('click', function(event){
@@ -290,16 +271,8 @@ $( document ).ready(function() {
 
     newStage();
 
-    var map = newMap();
+    Player1 = new Players([0, 2], [ [0, 1], [0, 0] ], [38, 40, 37, 39])
 
-    map[0][0] = 3;
-    map[0][1] = 2;
-    map[0][2] = 1;
-
-    $("#x0y2").html('<i class="fa fa-arrow-up"></i>')
-    $("#x0y1").html('<i class="fa fa-arrow-up"></i>')
-    $("#x0y0").html('<i class="fa fa-arrow-up"></i>')
-
-    updateScreen(map);
+    updateScreen();
 
 });
