@@ -4,6 +4,13 @@ body {
     margin: 0 8px;
 }
 
+
+#victory{
+    display: block;
+    font-weight: bold;
+    text-align: center;
+}
+
 .hidden{
     display: none;
     visibility: hidden;
