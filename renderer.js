@@ -11,15 +11,16 @@ var direction = [0, 1]
 var pos = [0, 2]
 var highScore
 var apple
-var Player1
 var deleted = []
+var playersArray = []
 
 var $ = require('jquery');
-
-function Players (startPos, body, keys) {
+// keys: [u, d, l, r]
+function Players (startPos, body, keys, tag) {
 
     this.length = 3;
     this.alive = true;
+    this.tag = tag
     this.xDir = 0;
     this.yDir = 1;
     this.prevxDir = 0;
@@ -34,8 +35,6 @@ function Players (startPos, body, keys) {
 
     this.xBody= [];
     this.yBody= [];
-
-    //DO NOT FORGET array.unshift
 
     this.xBody.push(body[0][0]);
     this.yBody.push(body[0][1]);
@@ -59,19 +58,24 @@ function Players (startPos, body, keys) {
         this.xBody.splice(this.length - 1, 10)
         this.yBody.splice(this.length - 1, 10)
 
-        this.xpos = nextX
-        this.ypos = nextY
-
         this.prevxDir = this.xDir;
         this.prevyDir = this.yDir;
 
         var connect = false;
 
-        for (var i = 0; i < this.xBody.length; i++) {
-            if (this.xBody[i] == nextX && this.yBody[i] == nextY){
+        playersArray.forEach(function(player) {
+            for (var i = 0; i < player.xBody.length; i++) {
+                if (player.xBody[i] == nextX && player.yBody[i] == nextY){
+                    connect = true
+                }
+            }
+            if (player.xpos == nextX && player.ypos == nextY){
                 connect = true
             }
-        }
+        });
+
+        this.xpos = nextX
+        this.ypos = nextY
 
         if (connect) {
             this.alive = false
@@ -118,7 +122,7 @@ function newStage(){
     $("#stage").empty();
     for (var y = size - 1; y > -1; y = y - 1){
             for (var x = 0; x < size; x++){
-                var newTile = $("<div>", {id: 'x' + String(x) + 'y' + String(y), "class": "tile"});
+                var newTile = $("<div>", {id: 'x' + String(x) + 'y' + String(y)});
                 $('#stage').append(newTile);
             }
     }
@@ -126,27 +130,31 @@ function newStage(){
 
 function updateScreen(){
 
-    
+    playersArray.forEach(function(player) {
 
-    if (Player1.prevxDir == 1 && Player1.prevyDir == 0){
+        if (player.prevxDir == 1 && player.prevyDir == 0){
 
-        //if right
-        $('#' + 'x' + Player1.xpos + 'y' + Player1.ypos).removeClass().addClass('head').html('<i class="fa fa-arrow-right"></i>');
-    }else if (Player1.prevxDir == -1 && Player1.prevyDir == 0){
+            //if right
+            $('#' + 'x' + player.xpos + 'y' + player.ypos).removeClass().addClass('head' + player.tag).html('<i class="fa fa-arrow-right"></i>');
+        }else if (player.prevxDir == -1 && player.prevyDir == 0){
 
-        //if left
-        $('#' + 'x' + Player1.xpos + 'y' + Player1.ypos).removeClass().addClass('head').html('<i class="fa fa-arrow-left"></i>');
-    }else if (Player1.prevxDir == 0 && Player1.prevyDir == 1){
+            //if left
+            $('#' + 'x' + player.xpos + 'y' + player.ypos).removeClass().addClass('head' + player.tag).html('<i class="fa fa-arrow-left"></i>');
+        }else if (player.prevxDir == 0 && player.prevyDir == 1){
 
-        //if up
-        $('#' + 'x' + Player1.xpos + 'y' + Player1.ypos).removeClass().addClass('head').html('<i class="fa fa-arrow-up"></i>');
-    }else if (Player1.prevxDir == 0 && Player1.prevyDir == -1){
+            //if up
+            $('#' + 'x' + player.xpos + 'y' + player.ypos).removeClass().addClass('head' + player.tag).html('<i class="fa fa-arrow-up"></i>');
+        }else if (player.prevxDir == 0 && player.prevyDir == -1){
 
-        //if down
-        $('#' + 'x' + Player1.xpos + 'y' + Player1.ypos).removeClass().addClass('head').html('<i class="fa fa-arrow-down"></i>');
-    }
+            //if down
+            $('#' + 'x' + player.xpos + 'y' + player.ypos).removeClass().addClass('head' + player.tag).html('<i class="fa fa-arrow-down"></i>');
+        }
 
-    $('#' + 'x' + Player1.xBody[0] + 'y' + Player1.yBody[0]).removeClass('head').addClass('snek');
+        $('#' + 'x' + player.xBody[0] + 'y' + player.yBody[0]).removeClass('head' + player.tag).addClass('snek' + player.tag);
+
+        $('#score' + player.tag).text( (player.length-3)/2 )
+
+    });
 
     deleted.forEach(function(tile) {
         $('#' + 'x' + tile[0] + 'y' + tile[1]).removeClass().text('')
@@ -155,7 +163,7 @@ function updateScreen(){
     deleted = [];
 
 
-    $('#score').text( (Player1.length-3)/2 )
+    
 }
 
 function spawnApple(){
@@ -166,43 +174,65 @@ function spawnApple(){
         appleX = Math.floor(Math.random() * (size - 0) + 0);
         appleY = Math.floor(Math.random() * (size - 0) + 0);
 
-        if ( !(appleX in Player1.xBody && appleY in Player1.yBody) || !(appleX == Player1.xpos && appleY == Player1.ypos) ){
-            apple = [appleX, appleY]
-            missed = false
-        }
+        missed = false;
+
+        playersArray.forEach(function(player) {
+
+            for (var i = 0; i < player.xBody.length; i++) {
+                if (player.xBody[i] == appleX && player.yBody[i] == appleY){
+                    missed = true
+                }
+            }
+
+            if (player.xpos == appleX && player.ypos == appleY){
+                missed = true
+            }
+        });
+
     }
+
+    apple = [appleX, appleY]
 
     $('#' + 'x' + apple[0] + 'y' + apple[1]).addClass('apple');
 }
 
 function play(){
 
-    
-    
     var turn = setInterval(function(){
 
+        playing = false
 
-        Player1.move()
+        playersArray.forEach(function(player) {
+            if (player.alive){
+                player.move()
 
 
-        if ( !(Player1.alive) ){
-            clearInterval(turn);
+                if ( !(player.alive) ){
 
-            score = (Player1.length-3)/2 ;
-            highScore =  parseInt(localStorage.getItem('highScore'));
-            if (score > highScore){
-                localStorage.setItem('highScore', score);
+                    score = ( player.length - 3 )/2 ;
+                    highScore =  parseInt(localStorage.getItem('highScore'));
+                    if (score > highScore){
+                        localStorage.setItem('highScore', score);
+                    }
+                    $("#highScore").text( localStorage.getItem('highScore') );
+
+                } else if ( player.xpos == apple[0] && player.ypos == apple[1] ){
+                    player.eat()
+                    spawnApple()
+                    playing = true
+                } else {
+                    playing = true
+                }
             }
-            $("#highScore").text( localStorage.getItem('highScore') );
+        });
 
-            $('#start').removeClass('hidden')
-        } else if ( Player1.xpos == apple[0] && Player1.ypos == apple[1] ){
-            Player1.eat()
-            spawnApple()
+        if ( !(playing) ){
+            clearInterval(turn);
+            $('#start').removeClass('hidden');
+            $('#playerAmount').removeClass('hidden');
+
+            $('#selectLabel').removeClass('hidden');
         }
-
-
-        
 
 
         updateScreen()
@@ -222,32 +252,92 @@ function play(){
 
 // event listner: keydown -> P1 direction  udate
 document.addEventListener('keydown', function(event) {
-    Player1.updateDirection(event.keyCode)
-}, false);
+    playersArray.forEach(function(player) {
+        player.updateDirection(event.keyCode)
+    }, this);
+});
 
 $('#start').on('click', function(event){
 
+    playersArray = []
+
     Player1 = 0
-    Player1 = new Players([0, 2], [ [0, 1], [0, 0] ], [38, 40, 37, 39])
+    Player2 = 0
+    Player3 = 0
+    Player4 = 0
+
+    playerAmount = $('#playerAmount').val()
+
+    for (var i = 0; i < playerAmount; i++) {
+        switch (i) {
+            case 0:
+
+                Player1 = new Players([0, 2], [ [0, 1], [0, 0] ], [38, 40, 37, 39], 0)
+                playersArray.push(Player1)
+
+                break;
+
+            case 1:
+
+                Player2 = new Players([24, 2], [ [24, 1], [24, 0] ], [90, 83, 81, 68], 1)
+                playersArray.push(Player2)
+
+                break;
+
+            case 2:
+
+                Player3 = new Players([0, 26], [ [0, 25], [0, 24] ], [104, 101, 100, 102], 2)
+                playersArray.push(Player3)
+
+                break;
+
+            case 3:
+
+                Player4 = new Players([24, 26], [ [24, 25], [24, 24] ], [85, 74, 72, 75], 3)
+                playersArray.push(Player4)
+
+                break;
+        }
+        
+    }
+
+    //up 38
+    //down 40
+    //left 37
+    //right 39
+
+    //z 90
+    //q 81
+    //s 83
+    //d 68
+
+    //4 100
+    //5 101
+    //6 102
+    //8 104
+
+    //u 85
+    //j 74
+    //h 72
+    //k 75
 
     $('#start').text('restart').addClass('hidden');
 
-    newStage()
+    $('#playerAmount').addClass('hidden');
 
-    $("#x0y2").html('<i class="fa fa-arrow-up"></i>')
-    $("#x0y1").html('<i class="fa fa-arrow-up"></i>')
-    $("#x0y0").html('<i class="fa fa-arrow-up"></i>')
+    $('#selectLabel').addClass('hidden');
+
+    newStage()
 
     spawnApple();
 
-    pos = [0, 2];
-    length = 3;
-    prevDirection = [0, 1]
-    direction = [0, 1]
-
     delay = 100;
+
+    $("#scoreboard").empty()
     
-    rounds = 0;
+    playersArray.forEach(function(player){
+        $("#scoreboard").append('Score p' + (player.tag + 1) + ': <span id="score' + player.tag + '"></span> ')
+    })
 
 
     play();
@@ -270,9 +360,5 @@ $( document ).ready(function() {
     $("#highScore").text( highScore );
 
     newStage();
-
-    Player1 = new Players([0, 2], [ [0, 1], [0, 0] ], [38, 40, 37, 39])
-
-    updateScreen();
 
 });

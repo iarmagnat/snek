@@ -38,14 +38,47 @@ button{
     outline: solid 1px lightgrey;
 }
 
-#stage div.snek{
+#stage div.snek0 {
     background-color: darkorange;
     border-radius: 50%;
     
 }
 
-#stage div.head {
+#stage div.head0 {
     background-color: orangered;
+    border-radius: 50%;
+}
+
+#stage div.snek1 {
+    background-color: lightskyblue;
+    border-radius: 50%;
+    
+}
+
+#stage div.head1 {
+    background-color: cornflowerblue;
+    border-radius: 50%;
+}
+
+#stage div.snek2 {
+    background-color: mediumpurple;
+    border-radius: 50%;
+    
+}
+
+#stage div.head2 {
+    background-color: purple;
+    border-radius: 50%;
+}
+
+#stage div.snek3 {
+    background-color: saddlebrown;
+    border-radius: 50%;
+    
+}
+
+#stage div.head3 {
+    background-color: brown;
     border-radius: 50%;
 }
 
