@@ -4,15 +4,13 @@
 
 const size = 50;
 
-var length = 3;
 var delay
-var prevDirection = [0, 1]
-var direction = [0, 1]
-var pos = [0, 2]
 var highScore
 var apple
 var deleted = []
 var playersArray = []
+var oldBestPlayer = -1
+var turn
 
 var $ = require('jquery');
 // keys: [u, d, l, r]
@@ -130,6 +128,8 @@ function newStage(){
 
 function updateScreen(){
 
+    scores = []
+
     playersArray.forEach(function(player) {
 
         if (player.prevxDir == 1 && player.prevyDir == 0){
@@ -154,11 +154,21 @@ function updateScreen(){
 
         $('#score' + player.tag).text( (player.length-3)/2 )
 
+        scores.push( (player.length-3)/2 )
+
     });
 
     deleted.forEach(function(tile) {
         $('#' + 'x' + tile[0] + 'y' + tile[1]).removeClass().text('')
     });
+
+    var bestPlayer = scores.indexOf(Math.max.apply( Math, scores )) + 1
+
+    if (bestPlayer != oldBestPlayer){
+        $('#victory').text('Player' + bestPlayer + ' is ahead')
+        oldBestPlayer = bestPlayer
+    }
+
 
     deleted = [];
 
@@ -198,7 +208,7 @@ function spawnApple(){
 
 function play(){
 
-    var turn = setInterval(function(){
+    turn = setInterval(function(){
 
         playing = false
 
@@ -228,6 +238,11 @@ function play(){
 
         if ( !(playing) ){
             clearInterval(turn);
+
+            $('#victory').text('Winner: Player' + oldBestPlayer);
+
+            $('#pause').addClass('hidden');
+
             $('#start').removeClass('hidden');
             $('#playerAmount').removeClass('hidden');
 
@@ -272,28 +287,28 @@ $('#start').on('click', function(event){
         switch (i) {
             case 0:
 
-                Player1 = new Players([0, 2], [ [0, 1], [0, 0] ], [38, 40, 37, 39], 0)
+                Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0)
                 playersArray.push(Player1)
 
                 break;
 
             case 1:
 
-                Player2 = new Players([24, 2], [ [24, 1], [24, 0] ], [90, 83, 81, 68], 1)
+                Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1)
                 playersArray.push(Player2)
 
                 break;
 
             case 2:
 
-                Player3 = new Players([0, 26], [ [0, 25], [0, 24] ], [104, 101, 100, 102], 2)
+                Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2)
                 playersArray.push(Player3)
 
                 break;
 
             case 3:
 
-                Player4 = new Players([24, 26], [ [24, 25], [24, 24] ], [85, 74, 72, 75], 3)
+                Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3)
                 playersArray.push(Player4)
 
                 break;
@@ -327,6 +342,10 @@ $('#start').on('click', function(event){
 
     $('#selectLabel').addClass('hidden');
 
+    $('#unpause').addClass('hidden');
+
+    $('#pause').removeClass('hidden');
+
     newStage()
 
     spawnApple();
@@ -348,7 +367,31 @@ $('#reset').on('click', function(event){
     $("#highScore").text( 0 );
 });
 
+$('#pause').on('click', function(event){
+    clearInterval(turn);
+    $('#pause').addClass('hidden');
+    $('#unpause').removeClass('hidden');
+    $('#start').removeClass('hidden');
+
+    $('#playerAmount').removeClass('hidden');
+
+    $('#selectLabel').removeClass('hidden');
+});
+
+$('#unpause').on('click', function(event){
+    play();
+    $('#pause').removeClass('hidden');
+    $('#unpause').addClass('hidden');
+    $('#start').addClass('hidden');
+
+    $('#playerAmount').addClass('hidden');
+
+    $('#selectLabel').addClass('hidden');
+});
+
 $( document ).ready(function() {  
+
+    $('#victory').text('Wellcome')
 
     if (! ("highScore" in localStorage) ){
         localStorage.setItem('highScore', '0');
