@@ -4,13 +4,13 @@
 
 const size = 50;
 
-var delay
-var highScore
-var apple
-var deleted = []
-var playersArray = []
-var oldBestPlayer = -1
-var turn
+var delay;
+var highScore;
+var apple;
+var deleted = [];
+var playersArray = [];
+var oldBestPlayer = -1;
+var turn;
 
 var $ = require('jquery');
 // keys: [u, d, l, r]
@@ -45,16 +45,16 @@ function Players (startPos, body, keys, tag) {
         nextX = (this.xDir + this.xpos + size)%size;
         nextY = (this.yDir + this.ypos + size)%size;
 
-        this.xBody.unshift(this.xpos)
-        this.yBody.unshift(this.ypos)
+        this.xBody.unshift(this.xpos);
+        this.yBody.unshift(this.ypos);
 
         deleted.push([ 
             this.xBody[this.length - 1],  
             this.yBody[this.length - 1] 
         ]);
 
-        this.xBody.splice(this.length - 1, 10)
-        this.yBody.splice(this.length - 1, 10)
+        this.xBody.splice(this.length - 1, 10);
+        this.yBody.splice(this.length - 1, 10);
 
         this.prevxDir = this.xDir;
         this.prevyDir = this.yDir;
@@ -64,50 +64,51 @@ function Players (startPos, body, keys, tag) {
         playersArray.forEach(function(player) {
             for (var i = 0; i < player.xBody.length; i++) {
                 if (player.xBody[i] == nextX && player.yBody[i] == nextY){
-                    connect = true
+                    connect = true;
                 }
             }
             if (player.xpos == nextX && player.ypos == nextY){
-                connect = true
+                connect = true;
             }
         });
 
-        this.xpos = nextX
-        this.ypos = nextY
+        this.xpos = nextX;
+        this.ypos = nextY;
 
         if (connect) {
-            this.alive = false
-            return false
+            this.alive = false;
+            return false;
         }
 
-        return true
+        return true;
     }
 
     this.eat = function(){
-        this.length += 2
+        this.length += 2;
+        spawnApple();
     }
 
     this.updateDirection = function(key){
         
         if(key == this.left) {
             if (this.prevxDir != 1 || this.prevyDir != 0){
-                this.xDir = -1
-                this.yDir = 0
+                this.xDir = -1;
+                this.yDir = 0;
             }
         } else if(key == this.right) {
             if (this.prevxDir != -1 || this.prevyDir != 0){
-                this.xDir = 1
-                this.yDir = 0
+                this.xDir = 1;
+                this.yDir = 0;
             }
         } else if(key == this.down) {
             if (this.prevxDir != 0 || this.prevyDir != 1){
-                this.xDir = 0
-                this.yDir = -1
+                this.xDir = 0;
+                this.yDir = -1;
             }
         } else if(key == this.up) {
             if (this.prevxDir != 0 || this.prevyDir != -1){
-                this.xDir = 0
-                this.yDir = 1
+                this.xDir = 0;
+                this.yDir = 1;
             }
         }
     }
@@ -128,7 +129,7 @@ function newStage(){
 
 function updateScreen(){
 
-    scores = []
+    scores = [];
 
     playersArray.forEach(function(player) {
 
@@ -152,21 +153,21 @@ function updateScreen(){
 
         $('#' + 'x' + player.xBody[0] + 'y' + player.yBody[0]).removeClass('head' + player.tag).addClass('snek' + player.tag);
 
-        $('#score' + player.tag).text( (player.length-3)/2 )
+        $('#score' + player.tag).text( (player.length-3)/2 );
 
-        scores.push( (player.length-3)/2 )
+        scores.push( (player.length-3)/2 );
 
     });
 
     deleted.forEach(function(tile) {
-        $('#' + 'x' + tile[0] + 'y' + tile[1]).removeClass().text('')
+        $('#' + 'x' + tile[0] + 'y' + tile[1]).removeClass().text('');
     });
 
-    var bestPlayer = scores.indexOf(Math.max.apply( Math, scores )) + 1
+    var bestPlayer = scores.indexOf(Math.max.apply( Math, scores )) + 1;
 
     if (bestPlayer != oldBestPlayer){
-        $('#victory').text('Player' + bestPlayer + ' is ahead')
-        oldBestPlayer = bestPlayer
+        $('#victory').text('Player' + bestPlayer + ' is ahead');
+        oldBestPlayer = bestPlayer;
     }
 
 
@@ -190,31 +191,33 @@ function spawnApple(){
 
             for (var i = 0; i < player.xBody.length; i++) {
                 if (player.xBody[i] == appleX && player.yBody[i] == appleY){
-                    missed = true
+                    missed = true;
                 }
             }
 
             if (player.xpos == appleX && player.ypos == appleY){
-                missed = true
+                missed = true;
             }
         });
 
     }
 
-    apple = [appleX, appleY]
+    apple = [appleX, appleY];
 
     $('#' + 'x' + apple[0] + 'y' + apple[1]).addClass('apple');
+
+    updateScreen();
 }
 
 function play(){
 
     turn = setInterval(function(){
 
-        playing = false
+        playing = false;
 
         playersArray.forEach(function(player) {
             if (player.alive){
-                player.move()
+                player.move();
 
 
                 if ( !(player.alive) ){
@@ -227,11 +230,10 @@ function play(){
                     $("#highScore").text( localStorage.getItem('highScore') );
 
                 } else if ( player.xpos == apple[0] && player.ypos == apple[1] ){
-                    player.eat()
-                    spawnApple()
-                    playing = true
+                    player.eat();
+                    playing = true;
                 } else {
-                    playing = true
+                    playing = true;
                 }
             }
         });
@@ -250,66 +252,57 @@ function play(){
         }
 
 
-        updateScreen()
+        updateScreen();
     }, delay);
 
 }
 
 
-/*
-    document.addEventListener('keydown', function updateUp1( event ) {
-        Player1.up = event.keyCode
-        console.log(Player1.up)
-    } , true);
-
-    document.removeEventListener('keydown', updateUp1(event) , true )
-*/
-
-// event listner: keydown -> P1 direction  udate
+// event listner: keydown -> direction  udate
 document.addEventListener('keydown', function(event) {
     playersArray.forEach(function(player) {
-        player.updateDirection(event.keyCode)
-    }, this);
+        player.updateDirection(event.keyCode);
+    });
 });
 
 $('#start').on('click', function(event){
 
-    playersArray = []
+    playersArray = [];
 
-    Player1 = 0
-    Player2 = 0
-    Player3 = 0
-    Player4 = 0
+    Player1 = 0;
+    Player2 = 0;
+    Player3 = 0;
+    Player4 = 0;
 
-    playerAmount = $('#playerAmount').val()
+    playerAmount = $('#playerAmount').val();
 
     for (var i = 0; i < playerAmount; i++) {
         switch (i) {
             case 0:
 
-                Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0)
-                playersArray.push(Player1)
+                Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0);
+                playersArray.push(Player1);
 
                 break;
 
             case 1:
 
-                Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1)
-                playersArray.push(Player2)
+                Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1);
+                playersArray.push(Player2);
 
                 break;
 
             case 2:
 
-                Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2)
-                playersArray.push(Player3)
+                Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2);
+                playersArray.push(Player3);
 
                 break;
 
             case 3:
 
-                Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3)
-                playersArray.push(Player4)
+                Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3);
+                playersArray.push(Player4);
 
                 break;
         }
@@ -346,16 +339,16 @@ $('#start').on('click', function(event){
 
     $('#pause').removeClass('hidden');
 
-    newStage()
+    newStage();
 
     spawnApple();
 
     delay = 100;
 
-    $("#scoreboard").empty()
+    $("#scoreboard").empty();
     
     playersArray.forEach(function(player){
-        $("#scoreboard").append('Score p' + (player.tag + 1) + ': <span id="score' + player.tag + '"></span> ')
+        $("#scoreboard").append('Score p' + (player.tag + 1) + ': <span id="score' + player.tag + '"></span> ');
     })
 
 

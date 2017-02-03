@@ -1,7 +1,11 @@
 body {
     background-color: black;
     color: white;
-    margin: 0 8px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 
@@ -25,11 +29,15 @@ button{
     float: right;
 }
 
+#hud {
+    width: 100vw;
+}
+
 #stage {
     display: flex;
     flex-wrap: wrap;
-    height: 500px;
-    width: 500px;
+    height: 70vh;
+    width: 70vh;
     background-color: white;
 }
 
