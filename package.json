@@ -6,12 +6,12 @@
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/iarmagnat/snek",
   "keywords": [
     "Snek",
     "snake"
   ],
-  "author": "ME",
+  "author": "iArmagnat",
   "devDependencies": {
     "electron": "^1.4.1"
   },
