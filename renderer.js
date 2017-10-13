@@ -2,11 +2,13 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
+const Search = require('./astar');
+
 const size = 50;
 
 var delay;
 var highScore;
-var apple;
+var apple = [];
 var deleted = [];
 var playersArray = [];
 var oldBestPlayer = -1;
@@ -18,7 +20,7 @@ function Players (startPos, body, keys, tag) {
 
     this.length = 3;
     this.alive = true;
-    this.tag = tag
+    this.tag = tag;
     this.xDir = 0;
     this.yDir = 1;
     this.prevxDir = 0;
@@ -77,6 +79,7 @@ function Players (startPos, body, keys, tag) {
 
         if (connect) {
             this.alive = false;
+            spawnApple();
             return false;
         }
 
@@ -129,7 +132,7 @@ function newStage(){
 
 function updateScreen(){
 
-    scores = [];
+    let scores = [];
 
     playersArray.forEach(function(player) {
 
@@ -179,29 +182,19 @@ function updateScreen(){
 
 function spawnApple(){
 
-    let missed = true;
+    if (apple.length){
+        $('#' + 'x' + apple[0] + 'y' + apple[1]).removeClass('apple');
+    }
+
+    let valid = false;
     let appleX;
     let appleY;
 
-    while (missed){
-        appleX = Math.floor(Math.random() * (size - 0) + 0);
-        appleY = Math.floor(Math.random() * (size - 0) + 0);
+    while (valid === false){
+        appleX = Math.floor(Math.random() * size);
+        appleY = Math.floor(Math.random() * size);
 
-        missed = false;
-
-        playersArray.forEach(function(player) {
-
-            for (var i = 0; i < player.xBody.length; i++) {
-                if (player.xBody[i] == appleX && player.yBody[i] == appleY){
-                    missed = true;
-                }
-            }
-
-            if (player.xpos == appleX && player.ypos == appleY){
-                missed = true;
-            }
-        });
-
+        valid = validateAppleSpawn(appleX, appleY);
     }
 
     apple = [appleX, appleY];
@@ -209,6 +202,57 @@ function spawnApple(){
     $('#' + 'x' + apple[0] + 'y' + apple[1]).addClass('apple');
 
     updateScreen();
+}
+
+function validateAppleSpawn(appleX, appleY) {
+
+    let gameGraph = [];
+
+    for (let x = 0; x < size; x++) {
+        gameGraph[x] = [];
+        for (let y = 0; y < size; y++) {
+            gameGraph[x][y] = 1;
+        }
+    }
+
+    playersArray.forEach(function(player) {
+
+        gameGraph[player.xpos][player.ypos] = 1;
+
+        for (var i = 0; i < player.xBody.length; i++) {
+
+            gameGraph[player.xBody[i]][player.yBody[i]] = 1;
+
+        }
+    });
+
+    gameGraph = new Search.Graph(gameGraph);
+
+    for (let index in playersArray) {
+        let player = playersArray[index];
+
+        for (var i = 0; i < player.xBody.length; i++) {
+            if (player.xBody[i] === appleX && player.yBody[i] === appleY){
+                return false;
+            }
+        }
+
+        if (player.xpos === appleX && player.ypos === appleY){
+            return false;
+        }
+
+        let start = gameGraph.grid[player.xpos][player.ypos];
+        let end = gameGraph.grid[appleX][appleY];
+
+        let result = Search.astar.search(gameGraph, start, end, {heuristic: Search.astar.heuristics.wrappingManhattan});
+
+        if (result.length === 0) {
+            return false;
+        }
+
+    }
+
+    return true;
 }
 
 function play(){
