@@ -16,7 +16,7 @@ var turn;
 
 var $ = require('jquery');
 // keys: [u, d, l, r]
-function Players (startPos, body, keys, tag) {
+function Players (startPos, body, keys, tag, bot=false) {
 
     this.length = 3;
     this.alive = true;
@@ -27,11 +27,14 @@ function Players (startPos, body, keys, tag) {
     this.prevyDir = 1;
     this.xpos = startPos[0];
     this.ypos = startPos[1];
+    this.bot = bot;
 
-    this.up = keys[0];
-    this.down = keys[1];
-    this.left = keys[2];
-    this.right = keys[3];
+    if (this.bot === false) {
+        this.up = keys[0];
+        this.down = keys[1];
+        this.left = keys[2];
+        this.right = keys[3];
+    }
 
     this.xBody= [];
     this.yBody= [];
@@ -42,52 +45,8 @@ function Players (startPos, body, keys, tag) {
     this.xBody.push(body[1][0]);
     this.yBody.push(body[1][1]);
 
-    this.move = function (){
-
-        let nextX = (this.xDir + this.xpos + size)%size;
-        let nextY = (this.yDir + this.ypos + size)%size;
-
-        this.xBody.unshift(this.xpos);
-        this.yBody.unshift(this.ypos);
-
-        deleted.push([ 
-            this.xBody[this.length - 1],  
-            this.yBody[this.length - 1] 
-        ]);
-
-        this.xBody.splice(this.length - 1, 10);
-        this.yBody.splice(this.length - 1, 10);
-
-        this.prevxDir = this.xDir;
-        this.prevyDir = this.yDir;
-
-        var connect = false;
-
-        playersArray.forEach(function(player) {
-            for (var i = 0; i < player.xBody.length; i++) {
-                if (player.xBody[i] == nextX && player.yBody[i] == nextY){
-                    connect = true;
-                }
-            }
-            if (player.xpos == nextX && player.ypos == nextY){
-                connect = true;
-            }
-        });
-
-        this.xpos = nextX;
-        this.ypos = nextY;
-
-        if (connect) {
-            this.alive = false;
-            spawnApple();
-            return false;
-        }
-
-        return true;
-    };
-
     this.eat = function(){
-        this.length += 2;
+        this.length += 10;
         spawnApple();
     };
 
@@ -116,7 +75,90 @@ function Players (startPos, body, keys, tag) {
         }
     }
 
+}
 
+Players.prototype.move = function (){
+
+    let nextX, nextY;
+
+    this.xBody.unshift(this.xpos);
+
+    this.yBody.unshift(this.ypos);
+    deleted.push([
+        this.xBody[this.length - 1],
+        this.yBody[this.length - 1]
+    ]);
+
+    this.xBody.splice(this.length - 1, 10);
+
+    this.yBody.splice(this.length - 1, 10);
+    this.prevxDir = this.xDir;
+
+    this.prevyDir = this.yDir;
+
+
+    if (this.bot) {
+        let gameGraph = [];
+
+        for (let x = 0; x < size; x++) {
+            gameGraph[x] = [];
+            for (let y = 0; y < size; y++) {
+                gameGraph[x][y] = 1;
+            }
+        }
+
+        playersArray.forEach(function(player) {
+
+
+            gameGraph[player.xpos][player.ypos] = 0;
+
+            for (var i = 0; i < player.xBody.length; i++) {
+
+                gameGraph[player.xBody[i]][player.yBody[i]] = 0;
+
+            }
+        });
+
+        gameGraph = new Search.Graph(gameGraph);
+
+        let start = gameGraph.grid[this.xpos][this.ypos];
+        let end = gameGraph.grid[apple[0]][apple[1]];
+
+        let result = Search.astar.search(gameGraph, start, end, {heuristic: Search.astar.heuristics.wrappingManhattan});
+
+        nextX = result[0].x;
+        nextY = result[0].y;
+
+    } else {
+        nextX = (this.xDir + this.xpos + size)%size;
+        nextY = (this.yDir + this.ypos + size)%size;
+    }
+
+
+
+    var connect = false;
+
+    playersArray.forEach(function(player) {
+        for (var i = 0; i < player.xBody.length; i++) {
+            if (player.xBody[i] == nextX && player.yBody[i] == nextY){
+                connect = true;
+            }
+        }
+        if (player.xpos == nextX && player.ypos == nextY){
+            connect = true;
+        }
+    });
+
+    this.xpos = nextX;
+    this.ypos = nextY;
+
+    if (connect) {
+        this.alive = false;
+        spawnApple();
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -217,11 +259,11 @@ function validateAppleSpawn(appleX, appleY) {
 
     playersArray.forEach(function(player) {
 
-        gameGraph[player.xpos][player.ypos] = 1;
+        gameGraph[player.xpos][player.ypos] = 0;
 
         for (var i = 0; i < player.xBody.length; i++) {
 
-            gameGraph[player.xBody[i]][player.yBody[i]] = 1;
+            gameGraph[player.xBody[i]][player.yBody[i]] = 0;
 
         }
     });
@@ -246,7 +288,7 @@ function validateAppleSpawn(appleX, appleY) {
 
         let result = Search.astar.search(gameGraph, start, end, {heuristic: Search.astar.heuristics.wrappingManhattan});
 
-        if (result.length === 0) {
+        if (result.length === 0 && player.alive) {
             return false;
         }
 
@@ -333,7 +375,7 @@ $('#start').on('click', function(event){
 
             case 1:
 
-                Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1);
+                Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1, true);
                 playersArray.push(Player2);
 
                 break;
