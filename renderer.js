@@ -42,8 +42,8 @@ function Players (startPos, body, keys, tag) {
 
     this.move = function (){
 
-        nextX = (this.xDir + this.xpos + size)%size;
-        nextY = (this.yDir + this.ypos + size)%size;
+        let nextX = (this.xDir + this.xpos + size)%size;
+        let nextY = (this.yDir + this.ypos + size)%size;
 
         this.xBody.unshift(this.xpos);
         this.yBody.unshift(this.ypos);
@@ -81,12 +81,12 @@ function Players (startPos, body, keys, tag) {
         }
 
         return true;
-    }
+    };
 
     this.eat = function(){
         this.length += 2;
         spawnApple();
-    }
+    };
 
     this.updateDirection = function(key){
         
@@ -114,7 +114,7 @@ function Players (startPos, body, keys, tag) {
     }
 
 
-};
+}
 
 
 function newStage(){
@@ -179,7 +179,9 @@ function updateScreen(){
 
 function spawnApple(){
 
-    missed = true
+    let missed = true;
+    let appleX;
+    let appleY;
 
     while (missed){
         appleX = Math.floor(Math.random() * (size - 0) + 0);
@@ -269,12 +271,12 @@ $('#start').on('click', function(event){
 
     playersArray = [];
 
-    Player1 = 0;
-    Player2 = 0;
-    Player3 = 0;
-    Player4 = 0;
+    let Player1;
+    let Player2;
+    let Player3;
+    let Player4;
 
-    playerAmount = $('#playerAmount').val();
+    let playerAmount = $('#playerAmount').val();
 
     for (var i = 0; i < playerAmount; i++) {
         switch (i) {
@@ -349,7 +351,7 @@ $('#start').on('click', function(event){
     
     playersArray.forEach(function(player){
         $("#scoreboard").append('Score p' + (player.tag + 1) + ': <span id="score' + player.tag + '"></span> ');
-    })
+    });
 
 
     play();
@@ -357,7 +359,7 @@ $('#start').on('click', function(event){
 
 $('#reset').on('click', function(event){
     localStorage.setItem('highScore', '0');
-    $("#highScore").text( 0 );
+    $('#highScore').text( 0 );
 });
 
 $('#pause').on('click', function(event){
@@ -384,7 +386,7 @@ $('#unpause').on('click', function(event){
 
 $( document ).ready(function() {  
 
-    $('#victory').text('Wellcome')
+    $('#victory').text('Wellcome');
 
     if (! ("highScore" in localStorage) ){
         localStorage.setItem('highScore', '0');
