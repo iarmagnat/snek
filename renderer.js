@@ -46,7 +46,7 @@ function Players (startPos, body, keys, tag, bot=false) {
     this.yBody.push(body[1][1]);
 
     this.eat = function(){
-        this.length += 10;
+        this.length += 2;
         spawnApple();
     };
 
@@ -126,13 +126,48 @@ Players.prototype.move = function (){
 
         let result = Search.astar.search(gameGraph, start, end, {heuristic: Search.astar.heuristics.wrappingManhattan});
 
-        nextX = result[0].x;
-        nextY = result[0].y;
+        if (result.length > 0) {
 
-    } else {
-        nextX = (this.xDir + this.xpos + size)%size;
-        nextY = (this.yDir + this.ypos + size)%size;
+            let xDiff = result[0].x - this.xpos;
+            let yDiff = result[0].y - this.ypos;
+
+            if (Math.abs(xDiff) === size -1 ) {
+                if ((xDiff) < 0 ) {
+                    this.xDir = 1
+                } else if ((xDiff) > 0 ) {
+                    this.xDir = -1
+                }
+            } else if ((xDiff) < 0 ) {
+                this.xDir = -1
+            } else if ((xDiff) > 0 ) {
+                this.xDir = 1
+            } else {
+                this.xDir = 0
+            }
+
+            if (Math.abs(yDiff) === size -1 ) {
+                if ((yDiff) < 0 ) {
+                    this.yDir = 1
+                } else if ((yDiff) > 0 ) {
+                    this.yDir = -1
+                }
+            } else if ((yDiff) < 0 ) {
+                this.yDir = -1
+            } else if ((yDiff) > 0 ) {
+                this.yDir = 1
+            } else {
+                this.yDir = 0
+            }
+        }
+
+        this.prevxDir = this.xDir;
+        this.prevyDir = this.yDir;
+
     }
+
+    nextX = (this.xDir + this.xpos + size)%size;
+    nextY = (this.yDir + this.ypos + size)%size;
+
 
 
 
@@ -159,7 +194,7 @@ Players.prototype.move = function (){
     }
 
     return true;
-}
+};
 
 
 function newStage(){
@@ -178,21 +213,20 @@ function updateScreen(){
 
     playersArray.forEach(function(player) {
 
-        if (player.prevxDir == 1 && player.prevyDir == 0){
-
             //if right
+        if (player.prevxDir == 1 && player.prevyDir == 0){
             $('#' + 'x' + player.xpos + 'y' + player.ypos).removeClass().addClass('head' + player.tag).html('<i class="fa fa-arrow-right"></i>');
-        }else if (player.prevxDir == -1 && player.prevyDir == 0){
 
             //if left
+        }else if (player.prevxDir == -1 && player.prevyDir == 0){
             $('#' + 'x' + player.xpos + 'y' + player.ypos).removeClass().addClass('head' + player.tag).html('<i class="fa fa-arrow-left"></i>');
-        }else if (player.prevxDir == 0 && player.prevyDir == 1){
 
             //if up
+        }else if (player.prevxDir == 0 && player.prevyDir == 1){
             $('#' + 'x' + player.xpos + 'y' + player.ypos).removeClass().addClass('head' + player.tag).html('<i class="fa fa-arrow-up"></i>');
-        }else if (player.prevxDir == 0 && player.prevyDir == -1){
 
             //if down
+        }else if (player.prevxDir == 0 && player.prevyDir == -1){
             $('#' + 'x' + player.xpos + 'y' + player.ypos).removeClass().addClass('head' + player.tag).html('<i class="fa fa-arrow-down"></i>');
         }
 
@@ -382,14 +416,14 @@ $('#start').on('click', function(event){
 
             case 2:
 
-                Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2);
+                Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2, true);
                 playersArray.push(Player3);
 
                 break;
 
             case 3:
 
-                Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3);
+                Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3, true);
                 playersArray.push(Player4);
 
                 break;
