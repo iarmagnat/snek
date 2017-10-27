@@ -265,12 +265,18 @@ function spawnApple(){
     let valid = false;
     let appleX;
     let appleY;
+    let tryAmount = 0;
 
-    while (valid === false){
+    while (valid === false && tryAmount < 20){
         appleX = Math.floor(Math.random() * size);
         appleY = Math.floor(Math.random() * size);
 
-        valid = validateAppleSpawn(appleX, appleY);
+        console.log(['try', tryAmount, appleX, appleY]);
+
+        let validate = validateAppleSpawn(appleX, appleY, tryAmount);
+
+        valid = validate[0];
+        tryAmount = validate[1];
     }
 
     apple = [appleX, appleY];
@@ -280,7 +286,7 @@ function spawnApple(){
     updateScreen();
 }
 
-function validateAppleSpawn(appleX, appleY) {
+function validateAppleSpawn(appleX, appleY, tryAmount) {
 
     let gameGraph = [];
 
@@ -309,12 +315,12 @@ function validateAppleSpawn(appleX, appleY) {
 
         for (var i = 0; i < player.xBody.length; i++) {
             if (player.xBody[i] === appleX && player.yBody[i] === appleY){
-                return false;
+                return [false, tryAmount];
             }
         }
 
         if (player.xpos === appleX && player.ypos === appleY){
-            return false;
+            return [false, tryAmount];
         }
 
         let start = gameGraph.grid[player.xpos][player.ypos];
@@ -323,12 +329,13 @@ function validateAppleSpawn(appleX, appleY) {
         let result = Search.astar.search(gameGraph, start, end, {heuristic: Search.astar.heuristics.wrappingManhattan});
 
         if (result.length === 0 && player.alive) {
-            return false;
+            tryAmount += 1;
+            return [false, tryAmount];
         }
 
     }
 
-    return true;
+    return [true, 0];
 }
 
 function play(){
@@ -396,39 +403,96 @@ $('#start').on('click', function(event){
     let Player3;
     let Player4;
 
-    let playerAmount = $('#playerAmount').val();
+    let playerAmount = parseInt($('#playerAmount').val(), 10);
 
-    for (var i = 0; i < playerAmount; i++) {
-        switch (i) {
-            case 0:
+    switch (playerAmount) {
+        case 1: //1 player
 
-                Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0);
-                playersArray.push(Player1);
+            Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0);
+            playersArray.push(Player1);
 
-                break;
+            break;
 
-            case 1:
+        case 2: //2 players
 
-                Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1, true);
-                playersArray.push(Player2);
+            Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0);
+            playersArray.push(Player1);
 
-                break;
+            Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1);
+            playersArray.push(Player2);
 
-            case 2:
+            break;
 
-                Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2, true);
-                playersArray.push(Player3);
+        case 3: //3 players
 
-                break;
+            Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0);
+            playersArray.push(Player1);
 
-            case 3:
+            Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1);
+            playersArray.push(Player2);
 
-                Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3, true);
-                playersArray.push(Player4);
+            Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2);
+            playersArray.push(Player3);
 
-                break;
-        }
-        
+            break;
+
+        case 4: //4 players
+
+            Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0);
+            playersArray.push(Player1);
+
+            Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1);
+            playersArray.push(Player2);
+
+            Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2);
+            playersArray.push(Player3);
+
+            Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3);
+            playersArray.push(Player4);
+
+            break;
+
+        case 5: //1 player 1 bot
+
+            Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0);
+            playersArray.push(Player1);
+
+            Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1, true);
+            playersArray.push(Player2);
+
+            break;
+
+        case 6:  //1 player 3 bots
+
+            Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0);
+            playersArray.push(Player1);
+
+            Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1, true);
+            playersArray.push(Player2);
+
+            Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2, true);
+            playersArray.push(Player3);
+
+            Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3, true);
+            playersArray.push(Player4);
+
+            break;
+
+        case 7: //no players 4 bots
+
+            Player1 = new Players([13, 15], [ [13, 14], [13, 13] ], [38, 40, 37, 39], 0, true);
+            playersArray.push(Player1);
+
+            Player2 = new Players([37, 39], [ [37, 38], [37, 37] ], [90, 83, 81, 68], 1, true);
+            playersArray.push(Player2);
+
+            Player3 = new Players([13, 39], [ [13, 38], [13, 37] ], [104, 101, 100, 102], 2, true);
+            playersArray.push(Player3);
+
+            Player4 = new Players([37, 15], [ [37, 14], [37, 13] ], [85, 74, 72, 75], 3, true);
+            playersArray.push(Player4);
+
+            break;
     }
 
     //up 38

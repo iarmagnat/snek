@@ -3,3 +3,4 @@ node_modules
 snek-dirty-1p.tar.gz
 snek-linux-x64/
 .idea
+.vscode

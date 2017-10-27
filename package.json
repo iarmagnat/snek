@@ -4,7 +4,10 @@
   "description": "A snek",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "win": "electron-builder --win"
   },
   "repository": "https://github.com/iarmagnat/snek",
   "keywords": [
@@ -17,5 +20,15 @@
   },
   "dependencies": {
     "jquery": "^3.1.1"
+  },
+  "build": {
+    "appId": "your.id",
+    "win": {
+      "target": [
+        {
+          "target": "nsis"
+        }
+      ]
+    }
   }
 }
